@@ -32,10 +32,8 @@ import states.editors.CharacterEditorState;
 import substates.PauseSubState;
 import substates.GameOverSubstate;
 
-#if !flash
 import flixel.addons.display.FlxRuntimeShader;
 import openfl.filters.ShaderFilter;
-#end
 
 #if VIDEOS_ALLOWED
 #if (hxCodec >= "3.0.0") import hxcodec.flixel.FlxVideo as VideoHandler;
@@ -264,6 +262,13 @@ class PlayState extends MusicBeatState
 	public var startCallback:Void->Void = null;
 	public var endCallback:Void->Void = null;
 
+	public static var shaggyVoice:Bool = false;
+	var isShaggy:Bool = false;
+
+	public static var globalFunny:CharacterFunnyEffect = CharacterFunnyEffect.None;
+
+	public var localFunny:CharacterFunnyEffect = CharacterFunnyEffect.None;
+
 	override public function create()
 	{
 		//trace('Playback Rate: ' + playbackRate);
@@ -465,6 +470,9 @@ class PlayState extends MusicBeatState
 		add(gfGroup);
 		add(dadGroup);
 		add(boyfriendGroup);
+		isShaggy = boyfriend.curCharacter == 'shaggy' || boyfriend.curCharacter == 'sshaggy' || boyfriend.curCharacter == 'pshaggy' || boyfriend.curCharacter == 'rshaggy' || boyfriend.curCharacter == 'supershaggy' || boyfriend.curCharacter == 'godshaggy' || boyfriend.curCharacter == 'redshaggy';
+
+
 
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		luaDebugGroup = new FlxTypedGroup<psychlua.DebugLuaText>();
@@ -560,6 +568,9 @@ class PlayState extends MusicBeatState
 
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
 		noteGroup.add(strumLineNotes);
+
+		shaggyVoice = isShaggy && ['warmup', 'house', 'insanity', 'polygonized', 'blocked', 'corn-theft', 'maze', 'splitathon', 'shredder', 'greetings', 'interdimensional', 'rano', 'bonus-song', 'bot-trot', 'escape-from-california', 'adventure', 'mealie', 'indignancy', 'memory', 'roofs', 'supernovae', 'glitch', 'master', 'cheating', 'unfairness', 'kabunga', 'recursed', 'exploitation'].contains(SONG.song.toLowerCase());
+
 
 		if(ClientPrefs.data.timeBarType == 'Song Name')
 		{
@@ -1342,7 +1353,12 @@ class PlayState extends MusicBeatState
 				var oppVocals = Paths.voices(songData.song, (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile);
 				if(oppVocals != null) opponentVocals.loadEmbedded(oppVocals);
 			}
+            if(boyfriend.curCharacter.endsWith('shaggy') && songData.needsVoices)
+			{
+		    	vocals = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.song, localFunny == CharacterFunnyEffect.Tristan ? "-Tristan" : shaggyVoice ? "Shaggy" : ""));
+			}
 		}
+
 		catch(e:Dynamic) {}
 
 		#if FLX_PITCH
@@ -3614,4 +3630,14 @@ class PlayState extends MusicBeatState
 		return false;
 	}
 	#end
+}
+
+enum ExploitationModchartType
+{
+	None; Cheating; Figure8; ScrambledNotes; Cyclone; Unfairness; Jitterwave; PingPong; Sex;
+}
+
+enum CharacterFunnyEffect
+{
+	None; Dave; Bambi; Tristan; Exbungo; Recurser; Shaggy;
 }
